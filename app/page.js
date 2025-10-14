@@ -14,8 +14,12 @@ export default function Home() {
       return
     }
 
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    alert('URL must start with http:// or https://')
+    return
+  }
+
     setIsLoading(true)
-    
     // Simulate scanning (we'll add real logic later)
     setTimeout(() => {
       alert(`Scanning: ${url}`)
@@ -38,7 +42,6 @@ export default function Home() {
             Analyze any crypto project, token, or NFT for scam signals before you invest.
           </p>
 
-          {/* UPDATE THIS SECTION: */}
           <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8 max-w-2xl mx-auto">
             <label className="block text-left text-sm font-medium text-gray-700 mb-2">
               Enter Crypto Project URL
@@ -49,7 +52,7 @@ export default function Home() {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://example-crypto-project.com"
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-600 text-black"
                 disabled={isLoading}
               />
               <button 

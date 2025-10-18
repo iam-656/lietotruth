@@ -1,70 +1,63 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
+export const runtime = 'nodejs'
+
 // POST /api/scan
 export async function POST(request) {
   try {
-    // 1. Get URL from request body
-    const { url } = await request.json()
-    
-    // 2. Validate URL
+    const { url } = await request.json();
+    console.log("📩 Received URL:", url);
+
     if (!url) {
-      return NextResponse.json(
-        { error: 'URL is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "URL is required" }, { status: 400 });
     }
 
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      return NextResponse.json(
-        { error: 'URL must start with http:// or https://' },
-        { status: 400 }
-      )
-    }
-
-    // 3. Analyze URL for scams (basic version for now)
-    const analysis = analyzeURL(url)
+    const analysis = analyzeURL(url);
+    console.log("🧠 Analysis result:", analysis);
 
     // 4. Save to database
+    console.log("🗄 Inserting into Supabase...");
     const { data: scan, error: dbError } = await supabase
-      .from('scans')
+      .from("scans")
       .insert({
         url: url,
         project_name: analysis.projectName,
         scam_score: analysis.scamScore,
         risk_level: analysis.riskLevel,
         red_flags: analysis.redFlags,
-        is_public: true
+        is_public: true,
       })
       .select()
-      .single()
+      .single();
+
+    console.log("📦 Supabase insert result:", { scan, dbError });
 
     if (dbError) {
-      console.error('Database error:', dbError)
+      console.error("❌ Database error:", dbError);
       return NextResponse.json(
-        { error: 'Failed to save scan' },
+        { error: "Failed to save scan", details: dbError },
         { status: 500 }
-      )
+      );
     }
 
-    // 5. Return results
     return NextResponse.json({
       id: scan.id,
       url: scan.url,
       projectName: analysis.projectName,
       scamScore: analysis.scamScore,
       riskLevel: analysis.riskLevel,
-      redFlags: analysis.redFlags
-    })
-
+      redFlags: analysis.redFlags,
+    });
   } catch (error) {
-    console.error('Scan error:', error)
+    console.error("💥 Scan error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error", details: error.message },
       { status: 500 }
-    )
+    );
   }
 }
+
 
 // Simple scam detection function (we'll improve this later)
 function analyzeURL(url) {

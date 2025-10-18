@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
+export const runtime = 'nodejs'
+
 export default function ResultsPage() {
   const params = useParams()
   const [scan, setScan] = useState(null)
